@@ -1,0 +1,510 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "API V1",
+    "version": "v1"
+  },
+  "basePath": "/api/v1",
+  "servers": [
+    {
+      "url": "http://{defaultHost}",
+      "variables": {
+        "defaultHost": {
+          "default": "localhost:3000/api/v1"
+        }
+      }
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "jwt": {
+        "type": "apiKey",
+        "description": "Bearer ey....",
+        "name": "Authorization",
+        "in": "header"
+      }
+    },
+    "schemas": {
+      "error_object": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Message"
+          }
+        }
+      },
+      "errors_object": {
+        "type": "object",
+        "properties": {
+          "errors": {
+            "$ref": "#/components/schemas/errors_map"
+          }
+        }
+      },
+      "errors_map": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "login": {
+        "type": "object",
+        "properties": {
+          "session": {
+            "$ref": "#/components/schemas/user_field"
+          }
+        },
+        "required": [
+          "session"
+        ]
+      },
+      "new_user": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/user_field"
+          }
+        },
+        "required": [
+          "user"
+        ]
+      },
+      "user_field": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email",
+            "example": "myemail@example.com"
+          },
+          "password": {
+            "type": "string",
+            "description": "Password",
+            "example": "Password1234"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "user": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "ID"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email",
+            "example": "myemail@example.com"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "account": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "title": {
+            "type": "string",
+            "description": "account title and searchable"
+          },
+          "iban": {
+            "type": "string",
+            "description": "iban number and searchable"
+          },
+          "amount": {
+            "type": "decimal",
+            "description": "Currenrly hold account balance"
+          },
+          "overdraft_limit": {
+            "type": "decimal",
+            "description": "overdraft_limit allowed"
+          },
+          "transactions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/transaction"
+            }
+          }
+        }
+      },
+      "transaction": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "amount": {
+            "type": "decimal"
+          },
+          "transaction_type": {
+            "type": "string",
+            "description": "could be deposit or withdraw"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "new_deposit": {
+        "type": "object",
+        "properties": {
+          "deposit": {
+            "type": "object",
+            "properties": {
+              "amount": {
+                "type": "decimal",
+                "description": "has to be greater than zero"
+              },
+              "description": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "amount"
+          ]
+        },
+        "required": [
+          "deposit"
+        ]
+      },
+      "new_withdraw": {
+        "type": "object",
+        "properties": {
+          "withdraw": {
+            "type": "object",
+            "properties": {
+              "amount": {
+                "type": "number",
+                "description": "has to be greater than zero"
+              },
+              "description": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "amount"
+          ]
+        },
+        "required": [
+          "withdraw"
+        ]
+      },
+      "new_account": {
+        "type": "object",
+        "properties": {
+          "account": {
+            "type": "object",
+            "properties": {
+              "amount": {
+                "type": "number",
+                "description": "has to be greater than zero"
+              },
+              "title": {
+                "type": "string"
+              },
+              "iban": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "amount",
+            "title,",
+            "iban"
+          ]
+        },
+        "required": [
+          "account"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/accounts/{account_id}/deposits": {
+      "post": {
+        "summary": "does deposits to a account",
+        "tags": [
+          "Deposits API"
+        ],
+        "security": [
+          {
+            "jwt": [
+
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "add amounts to account"
+          },
+          "422": {
+            "description": "Validation failed for request"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/new_deposit"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accounts/{account_id}/withdraws": {
+      "post": {
+        "summary": "does withdraws from a account",
+        "tags": [
+          "Withdraws API"
+        ],
+        "security": [
+          {
+            "jwt": [
+
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "deducts amounts from account"
+          },
+          "422": {
+            "description": "Validation failed if amount goes in negative"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/new_withdraw"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accounts/": {
+      "post": {
+        "summary": "Create a account",
+        "tags": [
+          "Accounts API"
+        ],
+        "security": [
+          {
+            "jwt": [
+
+            ]
+          }
+        ],
+        "parameters": [
+
+        ],
+        "responses": {
+          "200": {
+            "description": "Created a account"
+          },
+          "422": {
+            "description": "Validation failed for request"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/new_account"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "List of accounts with filters",
+        "tags": [
+          "Accounts API"
+        ],
+        "security": [
+          {
+            "jwt": [
+
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "title",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "returns the filtered account when passing search query"
+          }
+        }
+      }
+    },
+    "/login": {
+      "post": {
+        "summary": "Authenticate User",
+        "tags": [
+          "Authentication API"
+        ],
+        "parameters": [
+
+        ],
+        "responses": {
+          "200": {
+            "description": "authenticates and returns a new token"
+          },
+          "400": {
+            "description": "returns bad when password incorrect"
+          },
+          "422": {
+            "description": "returns validation when incorrect params"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/login"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/": {
+      "post": {
+        "summary": "Create a user",
+        "tags": [
+          "Users API"
+        ],
+        "parameters": [
+
+        ],
+        "responses": {
+          "200": {
+            "description": "Created a user"
+          },
+          "422": {
+            "description": "Validation failed for request"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/new_user"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{id}": {
+      "patch": {
+        "summary": "Update a user",
+        "tags": [
+          "Users API"
+        ],
+        "security": [
+          {
+            "jwt": [
+
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated a user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "$ref": "#/components/schemas/user"
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation failed for request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "$ref": "#/components/schemas/errors_object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/new_user"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

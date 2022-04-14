@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  web:
+    build: .
+    image: web
+    volumes:
+      - .:/usr/src/app
+    environment:
+      RAILS_ENV: development
+      DB_HOST: pg
+      DB_USER: postgres
+      DB_PASS: example
+      DB_NAME: job_market_place
+    ports:
+      - "3000:3000"
+    depends_on:
+      - pg
+  pg:
+    image: postgres:11-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: example
+    volumes:
+      - pg-data
+volumes:
+  pg-data:

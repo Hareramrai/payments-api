@@ -1,0 +1,18 @@
+en:
+  activemodel:
+    errors:
+      messages:
+        record_invalid: "validation error: %{errors}"
+  errors:
+    messages:
+      validation: "validation error: %{field}"
+
+  api:
+    errors:
+      messages:
+        invalid_credentials: "Email or password invalid"
+        invalid_token: "token invalid"
+        expired_token: "token expired"
+    secrets:
+      messages:
+        secret: "All your base are belong to us"
